@@ -31,6 +31,9 @@ class LanguageToolController extends TextEditingController {
   /// amount of time while the user is carrying out the event.
   final DelayType delayType;
 
+  /// Defines whether Language tool should be enabled or disabled
+  final bool enabled;
+
   /// Represents the duration of the delay for language checking.
   ///
   /// If the delay is [Duration.zero], no delaying is applied.
@@ -86,9 +89,11 @@ class LanguageToolController extends TextEditingController {
   LanguageToolController({
     this.highlightStyle = const HighlightStyle(),
     this.delay = Duration.zero,
+    this.enabled = true,
     this.delayType = DelayType.debouncing,
   }) {
-    _languageCheckService = _getLanguageCheckService();
+    if(enabled)
+      _languageCheckService = _getLanguageCheckService();
   }
 
   LanguageCheckService _getLanguageCheckService() {
