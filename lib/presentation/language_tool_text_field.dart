@@ -66,7 +66,6 @@ class LanguageToolTextField extends StatefulWidget {
 }
 
 class _LanguageToolTextFieldState extends State<LanguageToolTextField> {
-  static const _padding = 24.0;
 
   final _focusNode = FocusNode();
   final _scrollController = ScrollController();
@@ -104,9 +103,7 @@ class _LanguageToolTextFieldState extends State<LanguageToolTextField> {
           suffix: fetchError != null ? httpErrorText : null,
         );
 
-        return Padding(
-          padding: const EdgeInsets.all(_padding),
-          child: Center(
+        return Center(
             child: TextField(
               buildCounter: widget.buildCounter,
               focusNode: _focusNode,
@@ -121,7 +118,6 @@ class _LanguageToolTextFieldState extends State<LanguageToolTextField> {
               expands: widget.expands,
               style: widget.style,
             ),
-          ),
         );
       },
     );
