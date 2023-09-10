@@ -16,7 +16,7 @@ class LanguageToolTextField extends StatefulWidget {
   final TextInputAction? textInputAction;
 
   /// Text Align for Text Field
-  final TextAlign? textAlign;
+  final TextAlign textAlign;
   
   /// A style to use for the text being edited.
   final TextStyle? style;
