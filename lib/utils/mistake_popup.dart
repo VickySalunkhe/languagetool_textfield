@@ -51,7 +51,7 @@ class LanguageToolMistakePopup extends StatelessWidget {
   static const double _defaultVerticalMargin = 25.0;
   static const double _defaultHorizontalMargin = 10.0;
   static const double _defaultMaxWidth = 250.0;
-  static const _iconSize = 25.0;
+  static const _iconSize = 20.0;
 
   /// Renderer used to display this window.
   final PopupOverlayRenderer popupRenderer;
