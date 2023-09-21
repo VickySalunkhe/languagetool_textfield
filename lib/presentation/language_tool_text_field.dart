@@ -49,7 +49,7 @@ class LanguageToolTextField extends StatefulWidget {
 
   /// Set Color and height to cursor of TextField.
   final Color cursorColor;
-  final Color cursorHeight;
+  final double cursorHeight;
 
 
   /// Creates a widget that checks grammar errors.
