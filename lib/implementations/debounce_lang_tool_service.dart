@@ -28,7 +28,7 @@ class DebounceLangToolService extends LanguageCheckService {
 
   @override
   Future<void> dispose() async {
-    await debouncing.close();
+    debouncing.close();
     await baseService.dispose();
   }
 }
