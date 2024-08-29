@@ -92,8 +92,7 @@ class LanguageToolController extends TextEditingController {
     this.enabled = true,
     this.delayType = DelayType.debouncing,
   }) {
-    if(enabled)
-      _languageCheckService = _getLanguageCheckService();
+    if (enabled) _languageCheckService = _getLanguageCheckService();
   }
 
   LanguageCheckService _getLanguageCheckService() {
@@ -447,5 +446,22 @@ class LanguageToolController extends TextEditingController {
     Future.microtask(
       () => selection = TextSelection.collapsed(offset: offset),
     );
+  }
+
+  /// You can wrap text with prefix and suffix around the selected text
+  void wrapSelectedText(String prefix, String suffix) {
+    final selection = this.selection;
+    if (selection.isValid) {
+      final selectedText = selection.textInside(text);
+      final newText = text.replaceRange(
+          selection.start, selection.end, '$prefix$selectedText$suffix');
+      value = value.copyWith(
+        text: newText,
+        selection: selection.copyWith(
+          baseOffset: selection.start + prefix.length,
+          extentOffset: selection.end + prefix.length,
+        ),
+      );
+    }
   }
 }
