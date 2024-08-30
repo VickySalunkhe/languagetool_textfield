@@ -51,7 +51,6 @@ class LanguageToolTextField extends StatefulWidget {
   final Color? cursorColor;
   final double? cursorHeight;
 
-
   /// Creates a widget that checks grammar errors.
   const LanguageToolTextField({
     required this.controller,
@@ -128,6 +127,7 @@ class _LanguageToolTextFieldState extends State<LanguageToolTextField> {
             maxLines: widget.maxLines,
             expands: widget.expands,
             style: widget.style,
+            selectionControls: materialTextSelectionControls,
           ),
         );
       },
