@@ -449,17 +449,53 @@ class LanguageToolController extends TextEditingController {
   }
 
   /// You can wrap text with prefix and suffix around the selected text
-  void wrapSelectedText(String prefix, String suffix) {
+  void wrapSelectedText(String startTag, String endTag) {
     final selection = this.selection;
-    if (selection.isValid) {
-      final selectedText = selection.textInside(text);
-      final newText = text.replaceRange(
-          selection.start, selection.end, '$prefix$selectedText$suffix');
-      value = value.copyWith(
+
+    if (selection.isValid && !selection.isCollapsed) {
+      final selectedText = text.substring(selection.start, selection.end);
+
+      // Check if the selected text is already surrounded by the same or different tags
+      final beforeSelection = text.substring(0, selection.start);
+      final afterSelection = text.substring(selection.end);
+
+      final isAlreadyBold =
+          selectedText.startsWith('<b>') && selectedText.endsWith('</b>');
+      final isAlreadyItalic =
+          selectedText.startsWith('<i>') && selectedText.endsWith('</i>');
+      final isAlreadyUnderline =
+          selectedText.startsWith('<u>') && selectedText.endsWith('</u>');
+
+      String newText;
+
+      if (isAlreadyBold || isAlreadyItalic || isAlreadyUnderline) {
+        // If the same tag is applied, remove it
+        if ((isAlreadyBold && startTag == '<b>') ||
+            (isAlreadyItalic && startTag == '<i>') ||
+            (isAlreadyUnderline && startTag == '<u>')) {
+          newText = beforeSelection +
+              selectedText.substring(3, selectedText.length - 4) +
+              afterSelection;
+        } else {
+          // If a different tag is applied, replace it
+          final strippedText =
+              selectedText.substring(3, selectedText.length - 4);
+          newText = beforeSelection +
+              startTag +
+              strippedText +
+              endTag +
+              afterSelection;
+        }
+      } else {
+        // If no tags are applied, add the selected tag
+        newText =
+            beforeSelection + startTag + selectedText + endTag + afterSelection;
+      }
+
+      value = TextEditingValue(
         text: newText,
-        selection: selection.copyWith(
-          baseOffset: selection.start + prefix.length,
-          extentOffset: selection.end + prefix.length,
+        selection: TextSelection.collapsed(
+          offset: selection.start + startTag.length + selectedText.length,
         ),
       );
     }
