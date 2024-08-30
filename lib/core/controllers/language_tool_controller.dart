@@ -465,35 +465,31 @@ class LanguageToolController extends TextEditingController {
     }
   }
 
-  void wrapSelectedTextNew1(String prefix, String suffix) {
+  void wrapSelectedTextNew(String prefix, String suffix) {
     final selection = this.selection;
     if (selection.isValid && !selection.isCollapsed) {
       final selectedText = selection.textInside(text);
       final beforeSelection = selection.textBefore(text);
       final afterSelection = selection.textAfter(text);
 
-      // Check if the selected text is already surrounded by any tags
-      bool isAlreadyWrapped =
+      // Check if the selected text is already surrounded by the same tag
+      final bool isAlreadyWrapped =
           selectedText.startsWith(prefix) && selectedText.endsWith(suffix);
 
       String newText;
+      int newStart = selection.start;
+      int newEnd = selection.end;
 
       if (isAlreadyWrapped) {
-        // If the text is already wrapped with the same tag, remove the tag
+        // If already wrapped with the same tag, remove the tags
         newText = beforeSelection +
             selectedText.substring(
                 prefix.length, selectedText.length - suffix.length) +
             afterSelection;
 
-        value = value.copyWith(
-          text: newText,
-          selection: selection.copyWith(
-            baseOffset: selection.start,
-            extentOffset: selection.end - prefix.length - suffix.length,
-          ),
-        );
+        newEnd = selection.end - prefix.length - suffix.length;
       } else {
-        // Apply new tag, replacing any existing different tag
+        // Apply new tags or replace existing different tags
         final isBold =
             selectedText.startsWith('<b>') && selectedText.endsWith('</b>');
         final isItalic =
@@ -502,34 +498,29 @@ class LanguageToolController extends TextEditingController {
             selectedText.startsWith('<u>') && selectedText.endsWith('</u>');
 
         if (isBold || isItalic || isUnderline) {
-          // Strip the existing tags
+          // Strip the existing tags and apply new ones
           String strippedText =
               selectedText.substring(3, selectedText.length - 4);
           newText =
               beforeSelection + '$prefix$strippedText$suffix' + afterSelection;
 
-          value = value.copyWith(
-            text: newText,
-            selection: selection.copyWith(
-              baseOffset: selection.start,
-              extentOffset:
-                  selection.start + prefix.length + strippedText.length,
-            ),
-          );
+          newStart = selection.start;
+          newEnd = selection.start + prefix.length + strippedText.length;
         } else {
           // No tags present, apply the new tag
           newText =
               beforeSelection + '$prefix$selectedText$suffix' + afterSelection;
 
-          value = value.copyWith(
-            text: newText,
-            selection: selection.copyWith(
-              baseOffset: selection.start + prefix.length,
-              extentOffset: selection.end + prefix.length,
-            ),
-          );
+          newStart = selection.start;
+          newEnd = selection.end + prefix.length + suffix.length;
         }
       }
+
+      // Update the text and selection
+      value = value.copyWith(
+        text: newText,
+        selection: TextSelection(baseOffset: newStart, extentOffset: newEnd),
+      );
     }
   }
 }
