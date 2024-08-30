@@ -465,14 +465,13 @@ class LanguageToolController extends TextEditingController {
     }
   }
 
-  void wrapSelectedTextNew(String prefix, String suffix) {
+  void wrapSelectedTextNew1(String prefix, String suffix) {
     final selection = this.selection;
     if (selection.isValid && !selection.isCollapsed) {
       final selectedText = selection.textInside(text);
       final beforeSelection = selection.textBefore(text);
       final afterSelection = selection.textAfter(text);
 
-      // Check if the selected text is already surrounded by the same tag
       final bool isAlreadyWrapped =
           selectedText.startsWith(prefix) && selectedText.endsWith(suffix);
 
@@ -481,7 +480,7 @@ class LanguageToolController extends TextEditingController {
       int newEnd = selection.end;
 
       if (isAlreadyWrapped) {
-        // If already wrapped with the same tag, remove the tags
+        // Remove the existing tags
         newText = beforeSelection +
             selectedText.substring(
                 prefix.length, selectedText.length - suffix.length) +
@@ -489,7 +488,7 @@ class LanguageToolController extends TextEditingController {
 
         newEnd = selection.end - prefix.length - suffix.length;
       } else {
-        // Apply new tags or replace existing different tags
+        // Check for existing tags of a different type and replace them
         final isBold =
             selectedText.startsWith('<b>') && selectedText.endsWith('</b>');
         final isItalic =
@@ -498,25 +497,28 @@ class LanguageToolController extends TextEditingController {
             selectedText.startsWith('<u>') && selectedText.endsWith('</u>');
 
         if (isBold || isItalic || isUnderline) {
-          // Strip the existing tags and apply new ones
-          String strippedText =
+          // Strip the existing tags and apply the new ones
+          final String strippedText =
               selectedText.substring(3, selectedText.length - 4);
           newText =
-              beforeSelection + '$prefix$strippedText$suffix' + afterSelection;
+              '$beforeSelection$prefix$strippedText$suffix$afterSelection';
 
           newStart = selection.start;
-          newEnd = selection.start + prefix.length + strippedText.length;
+          newEnd = selection.start +
+              prefix.length +
+              strippedText.length +
+              suffix.length;
         } else {
-          // No tags present, apply the new tag
+          // Apply the new tags
           newText =
-              beforeSelection + '$prefix$selectedText$suffix' + afterSelection;
+              '$beforeSelection$prefix$selectedText$suffix$afterSelection';
 
           newStart = selection.start;
           newEnd = selection.end + prefix.length + suffix.length;
         }
       }
 
-      // Update the text and selection
+      // Update the text and selection, ensuring the entire new tag is selected
       value = value.copyWith(
         text: newText,
         selection: TextSelection(baseOffset: newStart, extentOffset: newEnd),
