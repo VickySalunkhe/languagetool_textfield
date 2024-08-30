@@ -449,7 +449,23 @@ class LanguageToolController extends TextEditingController {
   }
 
   /// You can wrap text with prefix and suffix around the selected text
-  void wrapSelectedText(String startTag, String endTag) {
+  void wrapSelectedText(String prefix, String suffix) {
+    final selection = this.selection;
+    if (selection.isValid) {
+      final selectedText = selection.textInside(text);
+      final newText = text.replaceRange(
+          selection.start, selection.end, '$prefix$selectedText$suffix');
+      value = value.copyWith(
+        text: newText,
+        selection: selection.copyWith(
+          baseOffset: selection.start + prefix.length,
+          extentOffset: selection.end + prefix.length,
+        ),
+      );
+    }
+  }
+
+  void wrapSelectedTextNew(String startTag, String endTag) {
     final selection = this.selection;
 
     if (selection.isValid && !selection.isCollapsed) {
@@ -492,12 +508,19 @@ class LanguageToolController extends TextEditingController {
             beforeSelection + startTag + selectedText + endTag + afterSelection;
       }
 
-      value = TextEditingValue(
+      value = value.copyWith(
         text: newText,
-        selection: TextSelection.collapsed(
-          offset: selection.start + startTag.length + selectedText.length,
+        selection: selection.copyWith(
+          baseOffset: selection.start + startTag.length,
+          extentOffset: selection.end + endTag.length,
         ),
       );
+      // value = TextEditingValue(
+      //   text: newText,
+      //   selection: TextSelection.collapsed(
+      //     offset: selection.start + startTag.length + selectedText.length,
+      //   ),
+      // );
     }
   }
 }
