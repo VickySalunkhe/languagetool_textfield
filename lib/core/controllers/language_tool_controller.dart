@@ -465,62 +465,71 @@ class LanguageToolController extends TextEditingController {
     }
   }
 
-  void wrapSelectedTextNew(String startTag, String endTag) {
+  void wrapSelectedTextNew1(String prefix, String suffix) {
     final selection = this.selection;
-
     if (selection.isValid && !selection.isCollapsed) {
-      final selectedText = text.substring(selection.start, selection.end);
+      final selectedText = selection.textInside(text);
+      final beforeSelection = selection.textBefore(text);
+      final afterSelection = selection.textAfter(text);
 
-      // Check if the selected text is already surrounded by the same or different tags
-      final beforeSelection = text.substring(0, selection.start);
-      final afterSelection = text.substring(selection.end);
-
-      final isAlreadyBold =
-          selectedText.startsWith('<b>') && selectedText.endsWith('</b>');
-      final isAlreadyItalic =
-          selectedText.startsWith('<i>') && selectedText.endsWith('</i>');
-      final isAlreadyUnderline =
-          selectedText.startsWith('<u>') && selectedText.endsWith('</u>');
+      // Check if the selected text is already surrounded by any tags
+      bool isAlreadyWrapped =
+          selectedText.startsWith(prefix) && selectedText.endsWith(suffix);
 
       String newText;
 
-      if (isAlreadyBold || isAlreadyItalic || isAlreadyUnderline) {
-        // If the same tag is applied, remove it
-        if ((isAlreadyBold && startTag == '<b>') ||
-            (isAlreadyItalic && startTag == '<i>') ||
-            (isAlreadyUnderline && startTag == '<u>')) {
-          newText = beforeSelection +
-              selectedText.substring(3, selectedText.length - 4) +
-              afterSelection;
-        } else {
-          // If a different tag is applied, replace it
-          final strippedText =
-              selectedText.substring(3, selectedText.length - 4);
-          newText = beforeSelection +
-              startTag +
-              strippedText +
-              endTag +
-              afterSelection;
-        }
-      } else {
-        // If no tags are applied, add the selected tag
-        newText =
-            beforeSelection + startTag + selectedText + endTag + afterSelection;
-      }
+      if (isAlreadyWrapped) {
+        // If the text is already wrapped with the same tag, remove the tag
+        newText = beforeSelection +
+            selectedText.substring(
+                prefix.length, selectedText.length - suffix.length) +
+            afterSelection;
 
-      value = value.copyWith(
-        text: newText,
-        selection: selection.copyWith(
-          baseOffset: selection.start + startTag.length,
-          extentOffset: selection.end + endTag.length,
-        ),
-      );
-      // value = TextEditingValue(
-      //   text: newText,
-      //   selection: TextSelection.collapsed(
-      //     offset: selection.start + startTag.length + selectedText.length,
-      //   ),
-      // );
+        value = value.copyWith(
+          text: newText,
+          selection: selection.copyWith(
+            baseOffset: selection.start,
+            extentOffset: selection.end - prefix.length - suffix.length,
+          ),
+        );
+      } else {
+        // Apply new tag, replacing any existing different tag
+        final isBold =
+            selectedText.startsWith('<b>') && selectedText.endsWith('</b>');
+        final isItalic =
+            selectedText.startsWith('<i>') && selectedText.endsWith('</i>');
+        final isUnderline =
+            selectedText.startsWith('<u>') && selectedText.endsWith('</u>');
+
+        if (isBold || isItalic || isUnderline) {
+          // Strip the existing tags
+          String strippedText =
+              selectedText.substring(3, selectedText.length - 4);
+          newText =
+              beforeSelection + '$prefix$strippedText$suffix' + afterSelection;
+
+          value = value.copyWith(
+            text: newText,
+            selection: selection.copyWith(
+              baseOffset: selection.start,
+              extentOffset:
+                  selection.start + prefix.length + strippedText.length,
+            ),
+          );
+        } else {
+          // No tags present, apply the new tag
+          newText =
+              beforeSelection + '$prefix$selectedText$suffix' + afterSelection;
+
+          value = value.copyWith(
+            text: newText,
+            selection: selection.copyWith(
+              baseOffset: selection.start + prefix.length,
+              extentOffset: selection.end + prefix.length,
+            ),
+          );
+        }
+      }
     }
   }
 }
